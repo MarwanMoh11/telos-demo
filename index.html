@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TELOS II · Live demo</title>
+<meta name="description" content="TELOS II live demo: a study-session coach whose advice holds under pressure and changes with new facts.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fbf7f3; --surface: #ffffff; --muted: #f4ece5; --sky: #daeff4; --sky-soft: #eaf4f6;
+    --ink: #2f3538; --ink-soft: #666569; --line: #e7ddd4; --clay: #b68171; --clay-strong: #8f5b4b;
+    --good: #2f6b4f; --good-bg: #e3f1e9; --bad: #8a2d3b; --bad-bg: #f6e3e6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #1f1b19; --surface: #2a2522; --muted: #332c28; --sky: #263a40; --sky-soft: #22323a;
+      --ink: #f1ebe6; --ink-soft: #bdb4ae; --line: #3d3531; --clay: #d6ad9c; --clay-strong: #e7c3b4;
+      --good: #9fd8b9; --good-bg: #213a2f; --bad: #f0a9b4; --bad-bg: #3d2328; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 400 16px/1.5 Inter, system-ui, sans-serif; }
+  main { max-width: 1040px; margin: 0 auto; padding: 32px 16px 64px; }
+  h1, h2, h3 { font-family: Fraunces, Georgia, serif; font-weight: 600; margin: 0; letter-spacing: -0.01em; }
+  h1 { font-size: clamp(2rem, 5vw, 3rem); line-height: 1.1; }
+  h2 { font-size: 1.5rem; margin-bottom: 12px; }
+  h3 { font-size: 1.1rem; }
+  .eyebrow { font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; color: var(--clay-strong); font-weight: 600; }
+  .lead { color: var(--ink-soft); font-size: 1.1rem; max-width: 46em; margin: 12px 0 0; }
+  header { display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: center; }
+  .qr { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 10px; text-align: center; }
+  .qr img { width: 132px; height: 132px; display: block; }
+  .qr span { font-size: .7rem; color: #555; }
+  .actions { display: flex; flex-wrap: wrap; gap: 12px; margin: 28px 0 8px; }
+  .btn { display: inline-flex; flex-direction: column; gap: 2px; padding: 14px 20px; border-radius: 14px; text-decoration: none;
+    border: 1px solid var(--line); background: var(--surface); color: var(--ink); min-width: 230px; }
+  .btn strong { font-weight: 600; }
+  .btn small { color: var(--ink-soft); font-size: .8rem; }
+  .btn.primary { background: var(--clay-strong); border-color: var(--clay-strong); color: #fff; }
+  .btn.primary small { color: #f6e8e2; }
+  .status { font-size: .85rem; color: var(--ink-soft); margin: 4px 0 0; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--ink-soft); margin-right: 6px; vertical-align: middle; }
+  .dot.on { background: #3aa16b; }
+  section { margin-top: 44px; }
+  .steps { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+  .step { display: grid; grid-template-columns: 44px 1fr; gap: 14px; background: var(--surface); border: 1px solid var(--line);
+    border-radius: 16px; padding: 16px; }
+  .num { width: 36px; height: 36px; border-radius: 50%; background: var(--sky); display: grid; place-items: center;
+    font-weight: 600; font-family: Fraunces, serif; }
+  .step p { margin: 4px 0 0; color: var(--ink-soft); }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .tag { font-size: .72rem; padding: 2px 8px; border-radius: 999px; background: var(--muted); color: var(--ink); font-family: ui-monospace, Menlo, monospace; }
+  .stage { font-size: .72rem; font-weight: 600; color: var(--clay-strong); text-transform: uppercase; letter-spacing: .08em; }
+  .contrast { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
+  .side { border-radius: 12px; padding: 10px 12px; font-size: .9rem; }
+  .side.telos { background: var(--good-bg); color: var(--good); }
+  .side.plain { background: var(--bad-bg); color: var(--bad); }
+  .side b { display: block; font-size: .75rem; text-transform: uppercase; letter-spacing: .06em; }
+  .stack { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .box { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; font-size: .88rem; }
+  .box b { display: block; font-size: .7rem; text-transform: uppercase; letter-spacing: .08em; color: var(--clay-strong); }
+  .arrow { color: var(--ink-soft); }
+  .numbers { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+  .stat { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px; }
+  .stat .v { font-family: Fraunces, serif; font-size: 2rem; font-weight: 600; line-height: 1.1; }
+  .stat p { margin: 6px 0 0; color: var(--ink-soft); font-size: .88rem; }
+  .note { font-size: .82rem; color: var(--ink-soft); margin-top: 10px; }
+  footer { margin-top: 48px; font-size: .82rem; color: var(--ink-soft); border-top: 1px solid var(--line); padding-top: 16px; }
+  a { color: var(--clay-strong); }
+  @media (max-width: 640px) {
+    header { grid-template-columns: 1fr; }
+    .contrast { grid-template-columns: 1fr; }
+    .btn { min-width: 0; width: 100%; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <div class="eyebrow">TELOS II · Progress Presentation IV · live demo</div>
+      <h1>Advice that holds when you push, and changes when you tell it something new</h1>
+      <p class="lead">A study-session coach for students. A language model reads and writes, a fixed policy decides,
+        and a verifier checks that the message says what the policy decided. This is the real app: React frontend,
+        FastAPI backend, the same <code>pipeline.run</code> the evaluation uses, and cloud models.</p>
+    </div>
+    <div class="qr"><img src="qr.png" alt="QR code for this page"><span>Scan to open on your phone</span></div>
+  </header>
+
+  <div class="actions">
+    <a class="btn primary" id="live" href="http://localhost:5173/">
+      <strong>Open the live app</strong><small id="live-sub">On the presenting laptop (scripts/demo.sh --cloud)</small>
+    </a>
+    <a class="btn" href="replay/">
+      <strong>Offline replay</strong><small>The same frontend, scripted answers, no backend</small>
+    </a>
+  </div>
+  <p class="status" id="status"><span class="dot"></span>Checking for a public live link…</p>
+
+  <section>
+    <h2>What the demo shows</h2>
+    <ol class="steps">
+      <li class="step"><div class="num">1</div><div>
+        <div class="stage">Check in · understand</div>
+        <h3>Say how you feel, in your own words</h3>
+        <p>Chat like you would with a friend. Claude Haiku 5.5 reads the message into ratings, each with the words it came from.
+          Small talk gets a model-written reply and never counts as a fact. Pressure (“just tell me I can keep going”) is kept apart, because it is not a fact.</p>
+        <div class="tags"><span class="tag">POST /api/v1/interpretations</span><span class="tag">POST /api/v1/chat/replies</span><span class="tag">elicitor · zero_shot_json</span></div>
+      </div></li>
+      <li class="step"><div class="num">2</div><div>
+        <div class="stage">Confirm</div>
+        <h3>You confirm what it understood</h3>
+        <p>A rating counts only when you wrote or confirmed the number. You can fix anything before a decision is made.</p>
+        <div class="tags"><span class="tag">Understood screen</span><span class="tag">confirmed facts only</span></div>
+      </div></li>
+      <li class="step"><div class="num">3</div><div>
+        <div class="stage">Decide · verify · respond</div>
+        <h3>One clear next step, decided by the policy</h3>
+        <p>Policy v1 (frozen 27 Oct) picks continue, microbreak, recovery break, switch task or stop. The model only writes the message;
+          the verifier checks it against the decision, retries once, then falls back to an approved template.</p>
+        <div class="tags"><span class="tag">POST /api/v1/recommendations</span><span class="tag">safety · cooldown · pipeline.run</span><span class="tag">verifier</span></div>
+      </div></li>
+      <li class="step"><div class="num">4</div><div>
+        <div class="stage">Sycophancy, turn by turn</div>
+        <h3>Push back, up to four times</h3>
+        <p>Each push goes to TELOS and, side by side, to the plain model: the same small model with the policy written into its prompt (condition B2).
+          Watch the turn at which the plain model gives in.</p>
+        <div class="contrast">
+          <div class="side telos"><b>TELOS</b>Same facts, so the same action. Pressure cannot change it.</div>
+          <div class="side plain"><b>Plain model (B2)</b>Often moves to a weaker step: “Keep going”.</div>
+        </div>
+        <div class="tags"><span class="tag">choices/new-evidence (framing only)</span><span class="tag">demo-api /baseline (separate server)</span></div>
+      </div></li>
+      <li class="step"><div class="num">5</div><div>
+        <div class="stage">New facts</div>
+        <h3>Tell it something new, and the advice changes</h3>
+        <p>New evidence re-runs the decision on the new facts. Stable under pressure, responsive to evidence.</p>
+        <div class="tags"><span class="tag">choices: accept · modify · ask-why · new-evidence · reject · end</span></div>
+      </div></li>
+      <li class="step"><div class="num">6</div><div>
+        <div class="stage">Remember · safety</div>
+        <h3>Opt-in memory, hard limits</h3>
+        <p>Memory is opt-in and can be listed and deleted. It can adjust a break length, never override a hard stop.
+          A safety phrase stops the study advice and points to AUC’s Center for Student Well-being. At most one unprompted suggestion every 10 minutes.</p>
+        <div class="tags"><span class="tag">GET/DELETE /api/v1/memories</span><span class="tag">safety hook</span><span class="tag">cooldown gate</span></div>
+      </div></li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>Under the hood</h2>
+    <div class="stack">
+      <div class="box"><b>App</b>React + Vite · browser and iOS (Capacitor)</div><span class="arrow">→</span>
+      <div class="box"><b>API</b>FastAPI · contract 1.0.0-draft</div><span class="arrow">→</span>
+      <div class="box"><b>Session</b>safety · cooldown · choices</div><span class="arrow">→</span>
+      <div class="box"><b>pipeline.run</b>interpret → remember → decide → render → verify</div><span class="arrow">→</span>
+      <div class="box"><b>LLM gateway</b>Haiku 5.5 reads · small model writes</div>
+    </div>
+    <p class="note">The plain model runs on a separate demo server; the API cannot reach the baselines. Every run records its strategies, models and prompt hashes.</p>
+  </section>
+
+  <section>
+    <h2>The numbers behind it</h2>
+    <div class="numbers">
+      <div class="stat"><div class="v">32 / 32</div><p>pushes where TELOS held, in scripted walkthroughs on the live servers (31 Oct). The plain model gave in on 3 of 4 pushes for the most tired student.</p></div>
+      <div class="stat"><div class="v">45% → 8.5%</div><p>flip rate of Qwen 3.5 9B with the policy in its prompt, and with the policy deciding (pilot, 240 pairs).</p></div>
+      <div class="stat"><div class="v">25/39 → 0/39</div><p>escalation ladders that flipped, prompt only vs. policy deciding (pilot).</p></div>
+      <div class="stat"><div class="v">687 + 535</div><p>backend and frontend tests passing, with CI on every pull request.</p></div>
+    </div>
+    <p class="note">Pilot numbers are preliminary (our own scenarios, before the pre-registered experiment). Pre-registration: <a href="https://osf.io/bfsqk">osf.io/bfsqk</a>.</p>
+  </section>
+
+  <footer>TELOS II · American University in Cairo · Senior Project II, Fall 2026 ·
+    Rodayna Elkhouly · Nourhan Elshorbagy · Marwan Abudaif · Youssef Ibrahim · Youssef Badawy · Mahmoud Refaie · Youssef Nader</footer>
+</main>
+<script>
+  // live.json is written by scripts/demo-public.sh when a public tunnel is up; ?live=<url> overrides it.
+  (async () => {
+    const status = document.getElementById('status');
+    const live = document.getElementById('live');
+    const sub = document.getElementById('live-sub');
+    const param = new URLSearchParams(location.search).get('live');
+    let url = param;
+    if (!url) {
+      try {
+        const res = await fetch('live.json?t=' + Date.now(), { cache: 'no-store' });
+        if (res.ok) url = (await res.json()).url;
+      } catch (_) { /* no live.json yet */ }
+    }
+    let up = false;
+    if (url) {
+      try { await fetch(url + '/api/v1/health', { mode: 'no-cors', cache: 'no-store' }); up = true; } catch (_) { up = false; }
+    }
+    if (up) {
+      live.href = url + '/';
+      sub.textContent = 'Public link, works on any phone';
+      status.innerHTML = '<span class="dot on"></span>Live backend reachable: ' + new URL(url).host;
+    } else {
+      status.innerHTML = '<span class="dot"></span>No public link right now. On the presenting laptop, the live app runs at localhost:5173.';
+    }
+  })();
+</script>
+</body>
+</html>
