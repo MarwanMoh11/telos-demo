@@ -73,6 +73,10 @@
     .contrast { grid-template-columns: 1fr; }
     .btn { min-width: 0; width: 100%; }
   }
+  .recs { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-top: 12px; }
+  .recs figure { margin: 0; }
+  .recs img { width: 100%; height: auto; display: block; border-radius: 14px; border: 1px solid rgba(0, 0, 0, 0.08); }
+  .recs figcaption { font-size: 13px; margin-top: 6px; opacity: 0.8; }
 </style>
 </head>
 <body>
@@ -83,17 +87,17 @@
       <h1>Advice that holds when you push, and changes when you tell it something new</h1>
       <p class="lead">A study-session coach for students. A language model reads and writes, a fixed policy decides,
         and a verifier checks that the message says what the policy decided. This is the real app: React frontend on GitHub Pages,
-        FastAPI backend on Render, the same <code>pipeline.run</code> the evaluation uses, and free OpenRouter models.</p>
+        FastAPI backend on Render, the same <code>pipeline.run</code> the evaluation uses, and Claude Haiku 5.5.</p>
     </div>
     <div class="qr"><img src="qr.png" alt="QR code for this page"><span>Scan to open on your phone</span></div>
   </header>
 
   <div class="actions">
     <a class="btn primary" href="app/">
-      <strong>Open the live app</strong><small>GitHub Pages + Render backend, free models</small>
+      <strong>Open the live app</strong><small>GitHub Pages + Render backend, Claude Haiku 5.5</small>
     </a>
     <a class="btn" href="http://localhost:5173/">
-      <strong>On the presenting laptop</strong><small>scripts/demo.sh --cloud, localhost:5173</small>
+      <strong>On the presenting laptop</strong><small>scripts/demo.sh --llm, localhost:5173</small>
     </a>
     <a class="btn" href="replay/">
       <strong>Offline replay</strong><small>The same frontend, scripted answers, no backend</small>
@@ -127,11 +131,11 @@
       <li class="step"><div class="num">4</div><div>
         <div class="stage">Sycophancy, turn by turn</div>
         <h3>Push back, up to four times</h3>
-        <p>Each push goes to TELOS and, side by side, to the plain model: the same small model with the policy written into its prompt (condition B2).
-          Watch the turn at which the plain model gives in.</p>
+        <p>Each push goes to TELOS and, side by side, to the plain model: a model with the policy written into its prompt (condition B2).
+          Live, both sides run Claude Haiku 5.5, which usually holds too; the recording below shows the small Qwen 3.5 9B giving in.</p>
         <div class="contrast">
           <div class="side telos"><b>TELOS</b>Same facts, so the same action. Pressure cannot change it.</div>
-          <div class="side plain"><b>Plain model (B2)</b>Often moves to a weaker step: “Keep going”.</div>
+          <div class="side plain"><b>Plain model (B2)</b>Small models often move to a weaker step: Qwen 3.5 9B cut a 15-minute break to 5.</div>
         </div>
         <div class="tags"><span class="tag">choices/new-evidence (framing only)</span><span class="tag">demo-api /baseline (separate server)</span></div>
       </div></li>
@@ -152,13 +156,24 @@
   </section>
 
   <section>
+    <h2>Recorded moments</h2>
+    <p class="note">The same four moments as the live slides, recorded from the real app (1 Nov), in case the network fails.</p>
+    <div class="recs">
+      <figure><img src="media/live-1-checkin.gif" alt="Sarah checks in and Telos asks one question" loading="lazy"><figcaption>① Sarah checks in</figcaption></figure>
+      <figure><img src="media/live-2-decide.gif" alt="She confirms what Telos understood and gets a 15-minute break" loading="lazy"><figcaption>② From her words to one step</figcaption></figure>
+      <figure><img src="media/live-3-pushback.gif" alt="TELOS holds while plain Qwen 3.5 9B gives in" loading="lazy"><figcaption>③ She pushes back (plain model: Qwen 3.5 9B)</figcaption></figure>
+      <figure><img src="media/live-4-newfacts.gif" alt="New facts change the advice to 5 minutes" loading="lazy"><figcaption>④ Facts move it, pressure does not</figcaption></figure>
+    </div>
+  </section>
+
+  <section>
     <h2>Under the hood</h2>
     <div class="stack">
       <div class="box"><b>App</b>React + Vite · browser and iOS (Capacitor)</div><span class="arrow">→</span>
       <div class="box"><b>API</b>FastAPI · contract 1.0.0-draft</div><span class="arrow">→</span>
       <div class="box"><b>Session</b>safety · cooldown · choices</div><span class="arrow">→</span>
       <div class="box"><b>pipeline.run</b>interpret → remember → decide → render → verify</div><span class="arrow">→</span>
-      <div class="box"><b>LLM gateway</b>Haiku 5.5 reads · small model writes</div>
+      <div class="box"><b>LLM gateway</b>Claude Haiku 5.5 reads and writes</div>
     </div>
     <p class="note">The plain model runs on a separate demo server; the API cannot reach the baselines. Every run records its strategies, models and prompt hashes.</p>
   </section>
@@ -166,7 +181,7 @@
   <section>
     <h2>The numbers behind it</h2>
     <div class="numbers">
-      <div class="stat"><div class="v">32 / 32</div><p>pushes where TELOS held, in scripted walkthroughs on the live servers (31 Oct). The plain model gave in on 3 of 4 pushes for the most tired student.</p></div>
+      <div class="stat"><div class="v">40 / 40</div><p>pushes where TELOS held, in scripted walkthroughs on 1 Nov (Claude Haiku 5.5). Plain Qwen 3.5 9B gave in on 3 of 4 pushes for the demo student; plain Haiku held 20 of 20.</p></div>
       <div class="stat"><div class="v">45% → 8.5%</div><p>flip rate of Qwen 3.5 9B with the policy in its prompt, and with the policy deciding (pilot, 240 pairs).</p></div>
       <div class="stat"><div class="v">25/39 → 0/39</div><p>escalation ladders that flipped, prompt only vs. policy deciding (pilot).</p></div>
       <div class="stat"><div class="v">687 + 535</div><p>backend and frontend tests passing, with CI on every pull request.</p></div>
