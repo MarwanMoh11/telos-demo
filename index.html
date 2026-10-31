@@ -82,21 +82,24 @@
       <div class="eyebrow">TELOS II · Progress Presentation IV · live demo</div>
       <h1>Advice that holds when you push, and changes when you tell it something new</h1>
       <p class="lead">A study-session coach for students. A language model reads and writes, a fixed policy decides,
-        and a verifier checks that the message says what the policy decided. This is the real app: React frontend,
-        FastAPI backend, the same <code>pipeline.run</code> the evaluation uses, and cloud models.</p>
+        and a verifier checks that the message says what the policy decided. This is the real app: React frontend on GitHub Pages,
+        FastAPI backend on Render, the same <code>pipeline.run</code> the evaluation uses, and free OpenRouter models.</p>
     </div>
     <div class="qr"><img src="qr.png" alt="QR code for this page"><span>Scan to open on your phone</span></div>
   </header>
 
   <div class="actions">
-    <a class="btn primary" id="live" href="http://localhost:5173/">
-      <strong>Open the live app</strong><small id="live-sub">On the presenting laptop (scripts/demo.sh --cloud)</small>
+    <a class="btn primary" href="app/">
+      <strong>Open the live app</strong><small>GitHub Pages + Render backend, free models</small>
+    </a>
+    <a class="btn" href="http://localhost:5173/">
+      <strong>On the presenting laptop</strong><small>scripts/demo.sh --cloud, localhost:5173</small>
     </a>
     <a class="btn" href="replay/">
       <strong>Offline replay</strong><small>The same frontend, scripted answers, no backend</small>
     </a>
   </div>
-  <p class="status" id="status"><span class="dot"></span>Checking for a public live link…</p>
+  <p class="status" id="status"><span class="dot"></span>Waking the backend (a free instance can take up to a minute)…</p>
 
   <section>
     <h2>What the demo shows</h2>
@@ -175,31 +178,27 @@
     Rodayna Elkhouly · Nourhan Elshorbagy · Marwan Abudaif · Youssef Ibrahim · Youssef Badawy · Mahmoud Refaie · Youssef Nader</footer>
 </main>
 <script>
-  // live.json is written by scripts/demo-public.sh when a public tunnel is up; ?live=<url> overrides it.
-  (async () => {
-    const status = document.getElementById('status');
-    const live = document.getElementById('live');
-    const sub = document.getElementById('live-sub');
-    const param = new URLSearchParams(location.search).get('live');
-    let url = param;
-    if (!url) {
-      try {
-        const res = await fetch('live.json?t=' + Date.now(), { cache: 'no-store' });
-        if (res.ok) url = (await res.json()).url;
-      } catch (_) { /* no live.json yet */ }
+  // The hosted app's backend runs on Render's free plan, which sleeps after 15 idle minutes.
+  // Opening this page wakes both services, so the app is warm by the time someone taps it.
+  const API = 'https://telos-api-27o3.onrender.com';
+  const BASELINE = 'https://telos-baseline.onrender.com';
+  const status = document.getElementById('status');
+  const health = (url) => fetch(url, { cache: 'no-store' }).then((r) => (r.ok ? r.json() : Promise.reject(r.status)));
+  async function wake(attempt = 1) {
+    try {
+      const [api, plain] = await Promise.all([health(API + '/api/v1/health'), health(BASELINE + '/health')]);
+      status.innerHTML = '<span class="dot on"></span>Backend ready · TELOS writes with ' + api.renderer_model +
+        ' · plain model ' + plain.model;
+    } catch (_) {
+      if (attempt < 8) {
+        status.innerHTML = '<span class="dot"></span>Waking the backend… (attempt ' + attempt + ' of 8)';
+        setTimeout(() => wake(attempt + 1), 10000);
+      } else {
+        status.innerHTML = '<span class="dot"></span>The hosted backend is not answering. Use the laptop link or the offline replay.';
+      }
     }
-    let up = false;
-    if (url) {
-      try { await fetch(url + '/api/v1/health', { mode: 'no-cors', cache: 'no-store' }); up = true; } catch (_) { up = false; }
-    }
-    if (up) {
-      live.href = url + '/';
-      sub.textContent = 'Public link, works on any phone';
-      status.innerHTML = '<span class="dot on"></span>Live backend reachable: ' + new URL(url).host;
-    } else {
-      status.innerHTML = '<span class="dot"></span>No public link right now. On the presenting laptop, the live app runs at localhost:5173.';
-    }
-  })();
+  }
+  wake();
 </script>
 </body>
 </html>
